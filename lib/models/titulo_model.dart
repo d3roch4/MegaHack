@@ -10,19 +10,27 @@ class Titulo {
   String categories;
   String description;
   List<String> recomentations;
+  bool favorite;
+  int quantity_purchased;
+  double classification;
+  int objetivos;
 
   Titulo({
     this.code,
-    this.beta,
     this.image,
     this.name,
     this.categories,
-    this.sale_price,
-    this.purchase_price,
-    this.liquids,
-    this.return_rate,
     this.description,
     this.recomentations,
+    this.beta = 0,
+    this.sale_price = 0,
+    this.purchase_price = 0,
+    this.liquids = 0,
+    this.return_rate = 0,
+    this.quantity_purchased = 0,
+    this.favorite = false,
+    this.classification = 0,
+    this.objetivos,
   });
 }
 

@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:invest_flix/models/titulo_model.dart';
+import 'package:invest_flix/screens/titulos_ctrl.dart';
 import 'package:invest_flix/widgets/circular_clipper.dart';
 import 'package:invest_flix/widgets/content_scroll.dart';
 import 'package:invest_flix/widgets/imagem.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 
-class AcaoScreen extends StatefulWidget {
-  final Titulo acao;
+class TituloScreen extends StatefulWidget {
+  final Titulo titulo;
 
-  AcaoScreen({this.acao});
+  TituloScreen(this.titulo);
 
   @override
-  _AcaoScreenState createState() => _AcaoScreenState();
+  _TituloScreenState createState() => _TituloScreenState();
 }
 
-class _AcaoScreenState extends State<AcaoScreen> {
+class _TituloScreenState extends State<TituloScreen> {
+  TitulosCtrl ctrl = Get.find();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +30,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
               Container(
                 transform: Matrix4.translationValues(0.0, -50.0, 0.0),
                 child: Hero(
-                  tag: widget.acao.image,
+                  tag: widget.titulo.image,
                   child: ClipShadowPath(
                     clipper: CircularClipper(),
                     shadow: Shadow(blurRadius: 20.0),
@@ -34,7 +38,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                       height: 400.0,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      image: getImagem(widget.acao.image),
+                      image: getImagem(widget.titulo.image),
                     ),
                   ),
                 ),
@@ -56,8 +60,11 @@ class _AcaoScreenState extends State<AcaoScreen> {
                   ),
                   IconButton(
                     padding: EdgeInsets.only(left: 30.0),
-                    onPressed: () => print('Add to Favorites'),
-                    icon: Icon(Icons.favorite_border),
+                    onPressed: favoritar,
+                    icon: Icon(
+                      widget.titulo.favorite ? Icons.favorite : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
                     iconSize: 30.0,
                     color: Colors.black,
                   ),
@@ -70,11 +77,11 @@ class _AcaoScreenState extends State<AcaoScreen> {
                   child: RawMaterialButton(
                     padding: EdgeInsets.all(10.0),
                     elevation: 12.0,
-                    onPressed: () => print('Play Video'),
+                    onPressed: () => print('Comprar'),
                     shape: CircleBorder(),
                     fillColor: Colors.white,
                     child: Icon(
-                      Icons.play_arrow,
+                      Icons.add_shopping_cart,
                       size: 60.0,
                       color: Colors.red,
                     ),
@@ -85,8 +92,8 @@ class _AcaoScreenState extends State<AcaoScreen> {
                 bottom: 0.0,
                 left: 20.0,
                 child: IconButton(
-                  onPressed: () => print('Add to My List'),
-                  icon: Icon(Icons.add),
+                  onPressed: () => print('Mais informaçãoes'),
+                  icon: Icon(Icons.info_outline),
                   iconSize: 40.0,
                   color: Colors.black,
                 ),
@@ -109,7 +116,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  widget.acao.name.toUpperCase(),
+                  widget.titulo.name.toUpperCase(),
                   style: TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold,
@@ -118,7 +125,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                 ),
                 SizedBox(height: 10.0),
                 Text(
-                  widget.acao.categories,
+                  widget.titulo.categories.isNullOrBlank ? '' : widget.titulo.categories,
                   style: TextStyle(
                     color: Colors.black54,
                     fontSize: 16.0,
@@ -144,7 +151,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                         ),
                         SizedBox(height: 2.0),
                         Text(
-                          'R\$${widget.acao.sale_price}',
+                          'R\$${widget.titulo.sale_price}',
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.w600,
@@ -163,7 +170,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                         ),
                         SizedBox(height: 2.0),
                         Text(
-                          '${widget.acao.liquids}%',
+                          '${widget.titulo.liquids}%',
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.w600,
@@ -182,7 +189,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                         ),
                         SizedBox(height: 2.0),
                         Text(
-                          '${widget.acao.return_rate}%',
+                          '${widget.titulo.return_rate}%',
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.w600,
@@ -197,7 +204,7 @@ class _AcaoScreenState extends State<AcaoScreen> {
                   height: 120.0,
                   child: SingleChildScrollView(
                     child: Text(
-                      widget.acao.description,
+                      widget.titulo.description.isNullOrBlank ? '' : widget.titulo.description,
                       style: TextStyle(
                         color: Colors.black54,
                       ),
@@ -208,20 +215,27 @@ class _AcaoScreenState extends State<AcaoScreen> {
             ),
           ),
           ContentScroll(
-            images: widget.acao.recomentations.map<String>((e){
+            images: widget.titulo.recomentations?.map<String>((e){
               Uri uri = Uri.parse(e);
               var id = uri.queryParameters['v'];
               return 'https://img.youtube.com/vi/${id}/0.jpg';
-            }).toList(),
+            })?.toList() ?? [],
             title: 'Análises',
             imageHeight: 200.0,
             imageWidth: 250.0,
             onClick: (i){
-              launch(widget.acao.recomentations[i]);
+              launch(widget.titulo.recomentations[i]);
             },
           ),
         ],
       ),
     );
+  }
+
+  void favoritar() {
+    ctrl.favorite(widget.titulo);
+    ctrl.treinarAi();
+    setState(() {
+    });
   }
 }

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:invest_flix/models/titulo_model.dart';
-import 'package:invest_flix/screens/acao_screen.dart';
-import 'package:invest_flix/screens/home_ctrl.dart';
-import 'package:invest_flix/screens/home_ctrl.dart';
+import 'package:invest_flix/screens/titulo_screen.dart';
+import 'package:invest_flix/screens/titulos_ctrl.dart';
+import 'package:invest_flix/screens/titulos_ctrl.dart';
 import 'package:invest_flix/widgets/content_scroll.dart';
 import 'package:invest_flix/widgets/imagem.dart';
 
 class HomeScreen extends StatelessWidget {
   PageController _pageController;
-  final HomeCtrl controller = Get.put(HomeCtrl());
+  final TitulosCtrl controller = Get.find();
 
   HomeScreen(){
     _pageController = PageController(initialPage: 0, viewportFraction: 0.8);
@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
         onTap: () => Navigator.push(
           Get.context,
           MaterialPageRoute(
-            builder: (_) => AcaoScreen(acao: destaques[index]),
+            builder: (_) => TituloScreen(destaques[index]),
           ),
         ),
         child: Stack(
@@ -131,49 +131,49 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
-          Container(
-            height: 90.0,
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 30.0),
-              scrollDirection: Axis.horizontal,
-              itemCount: labels.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  margin: EdgeInsets.all(10.0),
-                  width: 160.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFFD45253),
-                        Color(0xFF9E1F28),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFF9E1F28),
-                        offset: Offset(0.0, 2.0),
-                        blurRadius: 6.0,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      labels[index].toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.8,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+//          Container(
+//            height: 90.0,
+//            child: ListView.builder(
+//              padding: EdgeInsets.symmetric(horizontal: 30.0),
+//              scrollDirection: Axis.horizontal,
+//              itemCount: labels.length,
+//              itemBuilder: (BuildContext context, int index) {
+//                return Container(
+//                  margin: EdgeInsets.all(10.0),
+//                  width: 160.0,
+//                  decoration: BoxDecoration(
+//                    borderRadius: BorderRadius.circular(10.0),
+//                    gradient: LinearGradient(
+//                      begin: Alignment.topCenter,
+//                      end: Alignment.bottomCenter,
+//                      colors: [
+//                        Color(0xFFD45253),
+//                        Color(0xFF9E1F28),
+//                      ],
+//                    ),
+//                    boxShadow: [
+//                      BoxShadow(
+//                        color: Color(0xFF9E1F28),
+//                        offset: Offset(0.0, 2.0),
+//                        blurRadius: 6.0,
+//                      ),
+//                    ],
+//                  ),
+//                  child: Center(
+//                    child: Text(
+//                      labels[index].toUpperCase(),
+//                      style: TextStyle(
+//                        color: Colors.white,
+//                        fontSize: 16.0,
+//                        fontWeight: FontWeight.bold,
+//                        letterSpacing: 1.8,
+//                      ),
+//                    ),
+//                  ),
+//                );
+//              },
+//            ),
+//          ),
           SizedBox(height: 20.0),
           ContentScroll(
             images: myList,
@@ -182,6 +182,7 @@ class HomeScreen extends StatelessWidget {
             imageWidth: 150.0,
           ),
           SizedBox(height: 10.0),
+          Text('Opções:', style: Get.theme.textTheme.headline4),
           gridOpcoes()
         ],
       ),
@@ -196,6 +197,30 @@ class HomeScreen extends StatelessWidget {
           return Text(titulos.error.toString());
         else if(titulos.data == null)
           return Center(child: CircularProgressIndicator());
+
+        return ListView.separated(
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: titulos.data.length,
+          separatorBuilder: (ctx, i) => Divider(),
+          itemBuilder: (ctx, i){
+            var titulo = titulos.data[i];
+            return ListTile(
+              leading: Image(image: getImagem(titulo.image)),
+              title: Text(titulo.name),
+              trailing: Text('Retorno:\n${titulo.return_rate}'),
+              subtitle: Column(children: [
+                Row(
+                  children: [Text('P. Venda: ${titulo.sale_price}, P. Compra: ${titulo.purchase_price}')],
+                ),
+                Row(
+                  children: [Text('Risco: ${titulo.beta}, Liquides: ${titulo.liquids}')],
+                )
+              ]),
+              onTap: ()=>Get.to( TituloScreen(titulo) ),
+            );
+          },
+        );
 
         return GridView.count(
 //          childAspectRatio: 3/4,
